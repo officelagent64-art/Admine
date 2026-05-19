@@ -202,6 +202,12 @@
                                     <span id="cert-student-id-display" class="student-id-value">—</span>
                                     <span class="auto-badge"><i class="fa-solid fa-link mr-1"></i>auto</span>
                                 </div>
+                                <div id="cert-id-missing" class="hidden warning-box">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">No student linked</p>
+                                    </div>
+                                </div>
                             </div>
                             <div id="certificates-dropzone" class="cert-dropzone dropzone border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl p-6 text-center cursor-pointer relative">
                                 <input type="file" accept=".pdf" id="certificates-file" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -329,10 +335,13 @@
         const urlStudentId = new URLSearchParams(window.location.search).get('student_id');
 
         (function showStudentIdNow() {
-            const found = document.getElementById('cert-id-found');
+            const found   = document.getElementById('cert-id-found');
+            const missing = document.getElementById('cert-id-missing');
             if (urlStudentId) {
                 document.getElementById('cert-student-id-display').textContent = urlStudentId;
                 found.classList.remove('hidden');
+            } else {
+                missing.classList.remove('hidden');
             }
         })();
 
