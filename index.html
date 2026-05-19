@@ -145,9 +145,10 @@
                             <div><h2 class="text-lg font-bold text-slate-900 dark:text-white">Upload Schedule</h2><p class="text-xs text-slate-500 dark:text-slate-400">Excel files for class schedules</p></div>
                         </div>
                         <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Level</label><select id="planning-level" class="clean-select w-full"><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option></select></div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Level</label><select id="planning-level" onchange="updatePlanningSemestre()" class="clean-select w-full"><option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option></select></div>
                                 <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Group</label><select id="planning-group" class="clean-select w-full"><option value="G1">G1</option><option value="G2">G2</option><option value="G3">G3</option><option value="G4">G4</option></select></div>
+                                <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Semestre</label><select id="planning-semestre" class="clean-select w-full"><option value="S1">S1</option><option value="S2">S2</option></select></div>
                             </div>
                             <div id="planning-dropzone" class="dropzone border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer relative">
                                 <input type="file" accept=".xlsx,.xls" id="planning-file" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -473,8 +474,9 @@
             const { data: { session } } = await sb.auth.getSession();
             if (!session) { showToast('Session expired — please login again', 'error'); setTimeout(() => window.location.href = 'login.html', 1500); return; }
 
-            const level = document.getElementById('planning-level').value;
-            const group = document.getElementById('planning-group').value;
+            const level    = document.getElementById('planning-level').value;
+            const group    = document.getElementById('planning-group').value;
+            const semestre = document.getElementById('planning-semestre').value;
 
             const btn = document.getElementById(`${type}-btn`);
             const pd  = document.getElementById(`${type}-progress`);
@@ -483,7 +485,7 @@
             btn.disabled = true; pd.style.display = 'block'; fl.style.width = '40%'; pt.textContent = 'Uploading...';
 
             const ext      = file.name.split('.').pop();
-            const fileName = `${level}_${group}.${ext}`;
+            const fileName = `${level}_${group}_${semestre}.${ext}`;
 
             const { error } = await sb.storage.from(bucket).upload(fileName, file, {
                 contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -738,6 +740,15 @@
             setTimeout(() => t.remove(), 4000);
         }
 
+        // ── Semestre dynamique pour Planning ──
+        function updatePlanningSemestre() {
+            const level = document.getElementById('planning-level').value;
+            const sel   = document.getElementById('planning-semestre');
+            const map   = { L1: ['S1','S2'], L2: ['S3','S4'], L3: ['S5','S6'] };
+            const opts  = map[level] || ['S1','S2'];
+            sel.innerHTML = opts.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+
         // ── Semestre dynamique pour Notes ──
         function updateNotesSemestre() {
             const level = document.getElementById('notes-level').value;
@@ -756,6 +767,7 @@
             sel.innerHTML = opts.map(s => `<option value="${s}">${s}</option>`).join('');
         }
 
+        window.updatePlanningSemestre  = updatePlanningSemestre;
         window.updateNotesSemestre     = updateNotesSemestre;
         window.updateStudentsSemestre  = updateStudentsSemestre;
         window.deleteSectionFile       = deleteSectionFile;
